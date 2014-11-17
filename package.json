@@ -1,0 +1,41 @@
+{
+  "name": "png-stream",
+  "version": "1.0.0",
+  "description": "A streaming PNG encoder and decoder",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "buffer-crc32": "^0.2.3",
+    "bl": "^0.9.3",
+    "buffer-equal": "^0.0.1",
+    "pixel-stream": "^1.0.1"
+  },
+  "devDependencies": {
+    "concat-frames": "^1.0.0",
+    "concat-stream": "^1.4.6",
+    "mocha": "^2.0.1"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/devongovett/png-stream.git"
+  },
+  "keywords": [
+    "pixel-stream",
+    "image",
+    "decode",
+    "encode",
+    "codec",
+    "png"
+  ],
+  "author": "Devon Govett <devongovett@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devongovett/png-stream/issues"
+  },
+  "homepage": "https://github.com/devongovett/png-stream"
+}
