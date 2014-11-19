@@ -152,10 +152,18 @@ describe('PNGEncoder', function() {
     enc.end(pixels);
   });
   
-  it('errors with missing palette', function() {
-    assert.throws(function() {
-      var enc = new PNGEncoder(10, 10, { colorSpace: 'indexed' });
-    }, 'Requested indexed color space without palette');
+  it('errors with missing palette', function(done) {
+    var enc = new PNGEncoder(10, 10, { colorSpace: 'indexed' });
+    
+    enc.on('error', function(err) {
+      assert(err instanceof Error);
+      assert(/Requested indexed color space without palette/.test(err.message));
+      done();
+    });
+    
+    var pixels = new Buffer(10 * 10);
+    pixels.fill(0);
+    enc.end(pixels);
   });
   
   it('encodes an animated image', function(done) {
@@ -227,7 +235,7 @@ describe('PNGEncoder', function() {
          assert.equal(frames[1].colorSpace, 'rgb');
          assert.equal(frames[1].delay, 50);
          assert.deepEqual(frames[1].pixels.slice(0, 3), new Buffer([ 22, 204, 13 ]));
-         assert.equal(dec.repeatCount, Infinity);
+         assert.equal(dec.format.repeatCount, Infinity);
          done();
        }));
     

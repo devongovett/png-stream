@@ -37,9 +37,11 @@ function PNGDecoder() {
   this._buffer = new BufferList();
   this.meta = {};
   
-  this.animated = false;
-  this.numFrames = 1;
-  this.repeatCount = 1;
+  this.format = {
+    animated: false,
+    numFrames: 1,
+    repeatCount: 0
+  };
 }
 
 util.inherits(PNGDecoder, Transform);
@@ -165,9 +167,10 @@ PNGDecoder.prototype._readIHDR = function(data, done) {
     done();
     return 0;
   }
-    
-  this.width = data.readUInt32BE(0);
-  this.height = data.readUInt32BE(4);
+  
+  this.format.width = data.readUInt32BE(0);
+  this.format.height = data.readUInt32BE(4);
+  
   this.bits = data.get(8);
   this.colorType = data.get(9);
   this.compressionMethod = data.get(10);
@@ -177,27 +180,27 @@ PNGDecoder.prototype._readIHDR = function(data, done) {
   switch (this.colorType) {
     case PNG_COLOR_TYPE_INDEXED:
       this.colors = 1;
-      this.colorSpace = 'rgb';
+      this.format.colorSpace = 'rgb';
       break;
       
     case PNG_COLOR_TYPE_GRAY:
       this.colors = 1;
-      this.colorSpace = 'gray';
+      this.format.colorSpace = 'gray';
       break;
       
     case PNG_COLOR_TYPE_GRAYA:
       this.colors = 2;
-      this.colorSpace = 'graya';
+      this.format.colorSpace = 'graya';
       break;
       
     case PNG_COLOR_TYPE_RGB:
       this.colors = 3;
-      this.colorSpace = 'rgb';
+      this.format.colorSpace = 'rgb';
       break;
       
     case PNG_COLOR_TYPE_RGBA:
       this.colors = 4;
-      this.colorSpace = 'rgba';
+      this.format.colorSpace = 'rgba';
       break;
       
     default:
@@ -221,7 +224,7 @@ PNGDecoder.prototype._initFrame = function() {
   this._pixelOffset = 0;
   this._pixelType = -1;
   
-  this.scanlineLength = this.pixelBytes * this.width;
+  this.scanlineLength = this.pixelBytes * this.format.width;
   this._previousScanline = null;
   this._scanline = new Buffer(this.scanlineLength);
 };
@@ -248,7 +251,7 @@ PNGDecoder.prototype._readtRNS = function(data, done) {
     
   if (this.colorType === PNG_COLOR_TYPE_INDEXED) {
     this._transparencyIndex = data.slice(0, this._chunkSize);
-    this.colorSpace = 'rgba';
+    this.format.colorSpace = 'rgba';
   }
   
   done();
@@ -288,9 +291,9 @@ PNGDecoder.prototype._readacTL = function(data, done) {
     return 0;
   }
     
-  this.animated = true;
-  this.numFrames = data.readUInt32BE(0);
-  this.repeatCount = data.readUInt32BE(4) || Infinity;
+  this.format.animated = true;
+  this.format.numFrames = data.readUInt32BE(0);
+  this.format.repeatCount = data.readUInt32BE(4) || Infinity;
   
   done();
   return this._chunkSize;
@@ -336,7 +339,7 @@ PNGDecoder.prototype._readfcTL = function(data, done) {
 // Reads the image data chunk
 PNGDecoder.prototype._readIDAT = function(data, done) {
   if (!this._sawIDAT) {
-    this.emit('format');
+    this.emit('format', this.format);
     this.emit('meta', this.meta);
     this._sawIDAT = true;
   }
