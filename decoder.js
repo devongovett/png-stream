@@ -385,33 +385,34 @@ PNGDecoder.prototype._decodePixels = function(data) {
       if (pos >= data.length)
         return;
     }
-        
+    
+    // v8 deoptimizes switch statements with variables as cases, so we use constants here.
     switch (this._pixelType) {
-      case PNG_FILTER_NONE:
+      case 0: // PNG_FILTER_NONE
         for (; off < len && pos < data.length; off++)
           scanline[off] = data[pos++];
           
         break;
         
-      case PNG_FILTER_SUB:
+      case 1: // PNG_FILTER_SUB
         for (; off < len && pos < data.length; off++)
           scanline[off] = ((off < b ? 0 : scanline[off - b]) + data[pos++]) & 0xff;
           
         break;
         
-      case PNG_FILTER_UP:
+      case 2: // PNG_FILTER_UP
         for (; off < len && pos < data.length; off++)
           scanline[off] = (prev[off] + data[pos++]) & 0xff;
           
         break;
         
-      case PNG_FILTER_AVG:
+      case 3: //PNG_FILTER_AVG
         for (; off < len && pos < data.length; off++)
           scanline[off] = ((((off < b ? 0 : scanline[off - b]) + prev[off]) >>> 1) + data[pos++]) & 0xff;
           
         break;
         
-      case PNG_FILTER_PAETH:
+      case 4: // PNG_FILTER_PAETH
         for (; off < len && pos < data.length; off++) {
           var left = off < b ? 0 : scanline[off - b];
           var upper = prev[off];

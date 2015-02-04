@@ -257,32 +257,33 @@ PNGEncoder.prototype._filter = function(scanline) {
   for (var filter = PNG_FILTER_NONE; filter <= maxFilter; filter++) {
     tmp[0] = filter;
     
+    // v8 deoptimizes switch statements with variables as cases, so we use constants here.
     switch (filter) {
-      case PNG_FILTER_NONE:
+      case 0: // PNG_FILTER_NONE
         for (var i = 0; i < scanline.length; i++)
           tmp[i + 1] = scanline[i];
           
         break;
       
-      case PNG_FILTER_SUB:
+      case 1: // PNG_FILTER_SUB
         for (var i = 0; i < scanline.length; i++)
           tmp[i + 1] = (scanline[i] - (i < b ? 0 : scanline[i - b])) & 0xff;
           
         break;
         
-      case PNG_FILTER_UP:
+      case 2: // PNG_FILTER_UP
         for (var i = 0; i < scanline.length; i++)
           tmp[i + 1] = (scanline[i] - prev[i]) & 0xff;
           
         break;
         
-      case PNG_FILTER_AVG:
+      case 3: // PNG_FILTER_AVG
         for (var i = 0; i < scanline.length; i++)
           tmp[i + 1] = (scanline[i] - (((i < b ? 0 : scanline[i - b]) + prev[i]) >>> 1)) & 0xff;
           
         break;
         
-      case PNG_FILTER_PAETH:
+      case 4: // PNG_FILTER_PAETH
         for (var i = 0; i < scanline.length; i++) {
           var cur = scanline[i];
           var left = i < b ? 0 : scanline[i - b];
