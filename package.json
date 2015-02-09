@@ -1,6 +1,6 @@
 {
   "name": "png-stream",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A streaming PNG encoder and decoder",
   "main": "index.js",
   "directories": {
