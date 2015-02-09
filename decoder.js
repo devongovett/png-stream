@@ -26,9 +26,10 @@ var PNG_CRC = 3;
 
 var SIGNATURE = new Buffer([ 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a ]);
 
-function PNGDecoder() {
+function PNGDecoder(options) {
   Transform.call(this);
   
+  this._outputIndexed = (options && options.indexed) || false;
   this._state = PNG_SIGNATURE;
   this._chunk = null;
   this._chunkSize = 0;
@@ -180,7 +181,7 @@ PNGDecoder.prototype._readIHDR = function(data, done) {
   switch (this.colorType) {
     case PNG_COLOR_TYPE_INDEXED:
       this.colors = 1;
-      this.format.colorSpace = 'rgb';
+      this.format.colorSpace = this._outputIndexed ? 'indexed' : 'rgb';
       break;
       
     case PNG_COLOR_TYPE_GRAY:
@@ -237,6 +238,8 @@ PNGDecoder.prototype._readPLTE = function(data, done) {
   }
     
   this._palette = data.slice(0, this._chunkSize);
+  if (this._outputIndexed)
+    this.format.palette = this._palette;
   
   done();
   return this._chunkSize;
@@ -251,7 +254,11 @@ PNGDecoder.prototype._readtRNS = function(data, done) {
     
   if (this.colorType === PNG_COLOR_TYPE_INDEXED) {
     this._transparencyIndex = data.slice(0, this._chunkSize);
-    this.format.colorSpace = 'rgba';
+    if (this._outputIndexed) {
+      this.format.alphaPalette = this._transparencyIndex;
+    } else {
+      this.format.colorSpace = 'rgba';
+    }
   }
   
   done();
@@ -442,7 +449,7 @@ PNGDecoder.prototype._decodePixels = function(data) {
     
     
     if (off === len) {
-      if (this.colorType === PNG_COLOR_TYPE_INDEXED)
+      if (this.colorType === PNG_COLOR_TYPE_INDEXED && !this._outputIndexed)
         this.push(this._convertIndexedScanline(scanline));
       else
         this.push(scanline);

@@ -52,6 +52,21 @@ describe('PNGDecoder', function() {
       }));
   });
   
+  it('decodes an indexed RGBA image and returns raw data given `indexed` option', function(done) {
+    fs.createReadStream(__dirname + '/images/djay-indexed.png')
+      .pipe(new PNGDecoder({ indexed: true }))
+      .pipe(concat(function(frames) {
+        assert.equal(frames.length, 1);
+        assert.equal(frames[0].width, 512);
+        assert.equal(frames[0].height, 512);
+        assert.equal(frames[0].colorSpace, 'indexed');
+        assert(Buffer.isBuffer(frames[0].palette));
+        assert(Buffer.isBuffer(frames[0].pixels));
+        assert.equal(frames[0].pixels.length, 512 * 512);
+        done();
+      }));
+  });
+  
   it('decodes a grayscale image', function(done) {    
     fs.createReadStream(__dirname + '/images/gray.png')
       .pipe(new PNGDecoder)
