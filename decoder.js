@@ -30,6 +30,7 @@ function PNGDecoder(options) {
   Transform.call(this);
   
   this._outputIndexed = (options && options.indexed) || false;
+  this._decodeRaw = false;
   this._state = PNG_SIGNATURE;
   this._chunk = null;
   this._chunkSize = 0;
@@ -353,7 +354,12 @@ PNGDecoder.prototype._readIDAT = function(data, done) {
   
   var buf = data.slice(0, this._chunkSize - this._consumed);
   if (buf.length) {
-    this._zlib.write(buf, done);
+    if (this._decodeRaw) {
+      this.push(buf);
+      done();
+    } else {
+      this._zlib.write(buf, done);
+    }
   } else {
     done();
   }
