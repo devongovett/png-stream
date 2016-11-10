@@ -9,8 +9,8 @@ describe('PNGDecoder', function() {
     assert(PNGDecoder.probe(file));
     assert(!PNGDecoder.probe(new Buffer(100)));
   });
-  
-  it('decodes an RGB image', function(done) {    
+
+  it('decodes an RGB image', function(done) {
     fs.createReadStream(__dirname + '/images/trees.png')
       .pipe(new PNGDecoder)
       .pipe(concat(function(frames) {
@@ -23,8 +23,8 @@ describe('PNGDecoder', function() {
         done();
       }));
   });
-  
-  it('decodes an RGBA image', function(done) {    
+
+  it('decodes an RGBA image', function(done) {
     fs.createReadStream(__dirname + '/images/djay.png')
       .pipe(new PNGDecoder)
       .pipe(concat(function(frames) {
@@ -37,8 +37,8 @@ describe('PNGDecoder', function() {
         done();
       }));
   });
-  
-  it('decodes an indexed RGBA image', function(done) {    
+
+  it('decodes an indexed RGBA image', function(done) {
     fs.createReadStream(__dirname + '/images/djay-indexed.png')
       .pipe(new PNGDecoder)
       .pipe(concat(function(frames) {
@@ -51,7 +51,7 @@ describe('PNGDecoder', function() {
         done();
       }));
   });
-  
+
   it('decodes an indexed RGBA image and returns raw data given `indexed` option', function(done) {
     fs.createReadStream(__dirname + '/images/djay-indexed.png')
       .pipe(new PNGDecoder({ indexed: true }))
@@ -66,8 +66,8 @@ describe('PNGDecoder', function() {
         done();
       }));
   });
-  
-  it('decodes a grayscale image', function(done) {    
+
+  it('decodes a grayscale image', function(done) {
     fs.createReadStream(__dirname + '/images/gray.png')
       .pipe(new PNGDecoder)
       .pipe(concat(function(frames) {
@@ -80,8 +80,8 @@ describe('PNGDecoder', function() {
         done();
       }));
   });
-  
-  it('decodes a grayscale image with alpha', function(done) {    
+
+  it('decodes a grayscale image with alpha', function(done) {
     fs.createReadStream(__dirname + '/images/graya.png')
       .pipe(new PNGDecoder)
       .pipe(concat(function(frames) {
@@ -94,8 +94,8 @@ describe('PNGDecoder', function() {
         done();
       }));
   });
-  
-  it('decodes an animated image', function(done) {    
+
+  it('decodes an animated image', function(done) {
     fs.createReadStream(__dirname + '/images/chompy.png')
       .pipe(new PNGDecoder)
       .pipe(concat(function(frames) {
@@ -111,7 +111,7 @@ describe('PNGDecoder', function() {
         done();
       }));
   });
-  
+
   it('errors on invalid filter algorithm', function(done) {
     var called = false;
     fs.createReadStream(__dirname + '/images/broken.png')
@@ -122,5 +122,19 @@ describe('PNGDecoder', function() {
         if (!called) done();
         called = true;
       });
+  });
+
+  it('handles paeth filter on the first scanline', function(done) {
+    fs.createReadStream(__dirname + '/images/image001.png')
+      .pipe(new PNGDecoder)
+      .pipe(concat(function(frames) {
+        assert.equal(frames.length, 1);
+        assert.equal(frames[0].width, 366);
+        assert.equal(frames[0].height, 479);
+        assert.equal(frames[0].colorSpace, 'rgba');
+        assert(Buffer.isBuffer(frames[0].pixels));
+        assert.equal(frames[0].pixels.length, 366 * 479 * 4);
+        done();
+      }));
   });
 });
