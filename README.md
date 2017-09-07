@@ -6,7 +6,7 @@ normal still PNGs.
 
 ## Installation
 
-    npm png-stream
+    npm install png-stream
 
 For the browser, you can build using [Browserify](http://browserify.org/).
 
